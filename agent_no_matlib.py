@@ -59,7 +59,10 @@ class Agent:
         self.epsilon_decay = 0.995
         self.epsilon_min = 0.01
         self.update_counter = 0
-        
+
+        # Initialize these lists to track training stats
+        self.training_losses = []
+        self.training_rewards = []
 
     def get_state(self, player, enemies):
         nearest_enemy = min(enemies.sprites(), key=lambda e: abs(e.rect.x - player.rect.x), default=None)
@@ -94,7 +97,7 @@ class Agent:
         states, actions, rewards, next_states, dones = zip(*batch)
 
         states = torch.tensor(states, dtype=torch.float32)
-        actions = torch.tensor(actions)
+        actions = torch.tensor(actions, dtype=torch.long)
         rewards = torch.tensor(rewards, dtype=torch.float32)
         next_states = torch.tensor(next_states, dtype=torch.float32)
         dones = torch.tensor(dones, dtype=torch.float32)
@@ -114,7 +117,6 @@ class Agent:
         self.update_counter += 1
         if self.update_counter % 100 == 0:
             self.target_model.load_state_dict(self.model.state_dict())
-           
 
         self.epsilon = max(self.epsilon * self.epsilon_decay, self.epsilon_min)
 
